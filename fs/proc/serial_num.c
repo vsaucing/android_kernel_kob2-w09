@@ -7,7 +7,7 @@
 static char * serialno_get(void)
 {
 	char * s1= "";
-	char  dest[64]="";
+	static char  dest[64]="";
 	char * s2="not found";
 
 	s1 = strstr(saved_command_line,"uniqueno=");
