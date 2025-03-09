@@ -11,17 +11,8 @@
 #include <linux/fs.h>
 #include <linux/gfp.h>
 #include <linux/namei.h>
-
 #include "kernfs-internal.h"
 
-/**
- * kernfs_create_link - create a symlink
- * @parent: directory to create the symlink in
- * @name: name of the symlink
- * @target: target node for the symlink to point to
- *
- * Returns the created node on success, ERR_PTR() value on error.
- */
 struct kernfs_node *kernfs_create_link(struct kernfs_node *parent,
 				       const char *name,
 				       struct kernfs_node *target)
@@ -53,7 +44,7 @@ static int kernfs_get_target_path(struct kernfs_node *parent,
 	char *s = path;
 	int len = 0;
 
-	/* go up to the root, stop at the base */
+	/* Go up to the root, stop at the base */
 	base = parent;
 	while (base->parent) {
 		kn = target->parent;
@@ -68,27 +59,28 @@ static int kernfs_get_target_path(struct kernfs_node *parent,
 		base = base->parent;
 	}
 
-	/* determine end of target string for reverse fillup */
+	/* Determine end of target string for reverse fillup */
 	kn = target;
 	while (kn->parent && kn != base) {
 		len += strlen(kn->name) + 1;
 		kn = kn->parent;
 	}
 
-	/* check limits */
+	/* Check limits */
 	if (len < 2)
 		return -EINVAL;
 	len--;
 	if ((s - path) + len > PATH_MAX)
 		return -ENAMETOOLONG;
 
-	/* reverse fillup of target string from target to base */
+	/* Reverse fillup of target string from target to base */
 	kn = target;
 	while (kn->parent && kn != base) {
 		int slen = strlen(kn->name);
 
 		len -= slen;
-		strncpy(s + len, kn->name, slen);
+		/* Correctly use snprintf here to copy the name */
+		snprintf(s + len, slen + 1, "%s", kn->name);
 		if (len)
 			s[--len] = '/';
 
