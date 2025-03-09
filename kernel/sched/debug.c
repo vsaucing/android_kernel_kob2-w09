@@ -137,10 +137,10 @@ static int sched_feat_set(char *cmp)
 }
 
 static ssize_t
-sched_feat_write(struct file *filp, const char __user *ubuf,
+void sched_feat_write(struct file *filp, const char __user *ubuf,
 		size_t cnt, loff_t *ppos)
 {
-	char buf[64] {0};
+	char buf[64] = {0};
 	char *cmp;
 	int i;
 	struct inode *inode;
@@ -148,9 +148,10 @@ sched_feat_write(struct file *filp, const char __user *ubuf,
 	if (cnt > 63)
 		cnt = 63;
 
-	if (copy_from_user(&buf, ubuf, cnt))
+	if (copy_from_user(&buf, ubuf, cnt)) {
 		return -EFAULT;
-
+	}
+	
 	buf[cnt] = 0;
 	cmp = strstrip(buf);
 
